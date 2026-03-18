@@ -221,265 +221,393 @@ Mahasiswa Teknologi Informasi.
 
 # 📘 UMKM Platform API Documentation
 
-Base URL: http://localhost:8000/api
+Base URL:
+```
+http://umkm-platform.my.id/api
+```
 
-------------------------------------------------------------------------
-
-# 🔐 AUTHORIZATION
-
-Gunakan header berikut untuk endpoint yang membutuhkan token:
-
-Authorization: Bearer {token}
-
-------------------------------------------------------------------------
+---
 
 # 🔐 AUTH
 
 ## 1. Register
-
 ❌ No Bearer Token
 
+**Endpoint**
+```
 POST /register
+```
 
-Request Body: { "name": "Ridho Darmawan", "email": "ridho@mail.com",
-"password": "password123", "password_confirmation": "password123",
-"role": "buyer" }
+**Request Body**
+```json
+{
+  "name": "Ridho Darmawan",
+  "email": "ridho@mail.com",
+  "password": "password123",
+  "password_confirmation": "password123",
+  "role": "buyer"
+}
+```
 
-Response (201): { "message": "Register success", "user": { "id": 1,
-"name": "Ridho Darmawan", "email": "ridho@mail.com", "role": "buyer" } }
+**Response**
+```json
+{
+  "message": "Register success",
+  "user": {
+    "id": 1,
+    "name": "Ridho Darmawan",
+    "email": "ridho@mail.com",
+    "role": "buyer"
+  }
+}
+```
 
-------------------------------------------------------------------------
+---
 
 ## 2. Login
-
 ❌ No Bearer Token
 
+**Endpoint**
+```
 POST /login
+```
 
-Request Body: { "email": "ridho@mail.com", "password": "password123" }
+**Request Body**
+```json
+{
+  "email": "ridho@mail.com",
+  "password": "password123"
+}
+```
 
-Response: { "token": "1\|xxxxx", "user": { "id": 1, "name": "Ridho
-Darmawan", "role": "buyer" } }
+**Response**
+```json
+{
+  "token": "1|xxxxx",
+  "user": {
+    "id": 1,
+    "name": "Ridho Darmawan",
+    "role": "buyer"
+  }
+}
+```
 
-------------------------------------------------------------------------
+---
 
 ## 3. Profile
-
 ✅ Bearer Token
 
+```
 GET /profile
+```
 
-------------------------------------------------------------------------
+**Response**
+```json
+{
+  "id": 1,
+  "name": "Ridho Darmawan",
+  "email": "ridho@mail.com",
+  "role": "buyer"
+}
+```
+
+---
 
 ## 4. Logout
-
 ✅ Bearer Token
 
+```
 POST /logout
+```
 
-------------------------------------------------------------------------
+---
 
 # 🏪 STORE
 
 ## 1. Create Store
-
 ✅ Bearer Token (Seller)
 
+```
 POST /stores
+```
 
-Request Body: { "name": "Warung Bu Siti", "description": "Makanan
-rumahan enak", "address": "Bekasi Timur", "latitude": -6.2345,
-"longitude": 106.9921 }
+**Request Body**
+```json
+{
+  "name": "Warung Bu Siti",
+  "description": "Makanan rumahan enak",
+  "address": "Bekasi Timur",
+  "latitude": -6.2345,
+  "longitude": 106.9921
+}
+```
 
-Response: { "message": "Store created", "data": { "id": 1, "name":
-"Warung Bu Siti", "owner_id": 2 } }
+**Response**
+```json
+{
+  "message": "Store created",
+  "data": {
+    "id": 1,
+    "name": "Warung Bu Siti"
+  }
+}
+```
 
-------------------------------------------------------------------------
+---
 
 ## 2. Get Store Detail
-
 ❌ No Bearer Token
 
+```
 GET /stores/{id}
+```
 
-Response: { "id": 1, "name": "Warung Bu Siti", "address": "Bekasi
-Timur", "products": \[ { "id": 1, "name": "Nasi Goreng", "price": 15000,
-"image_url": "http://localhost:8000/storage/products/xxx.jpg" } \] }
+**Response**
+```json
+{
+  "id": 1,
+  "name": "Warung Bu Siti",
+  "address": "Bekasi Timur",
+  "products": []
+}
+```
 
-------------------------------------------------------------------------
+---
 
 ## 3. Nearby Stores
-
 ❌ No Bearer Token
 
+```
 GET /stores/nearby?lat=-6.2&lng=106.9
+```
 
-------------------------------------------------------------------------
+---
 
 # 🍔 PRODUCT
 
 ## 1. Get Products by Store
-
 ❌ No Bearer Token
 
+```
 GET /stores/{id}/products
+```
 
-------------------------------------------------------------------------
+---
 
 ## 2. Create Product
-
 ✅ Bearer Token
 
+```
 POST /products
+```
 
-Content-Type: multipart/form-data
+**Request Body**
+```json
+{
+  "store_id": 1,
+  "name": "Nasi Goreng",
+  "description": "Nasi goreng spesial",
+  "image": "Choose file (Multipart Form Data)",
+  "price": 15000,
+  "stock": 100
+}
+```
 
-Form Data: - store_id (text) - name (text) - description (text) - price
-(text) - stock (text) - image (file)
-
-Response: { "success": true, "message": "Product created", "data": {
-"id": 1, "name": "Nasi Goreng", "price": 15000, "image":
-"products/xxx.jpg", "image_url":
-"http://localhost:8000/storage/products/xxx.jpg" } }
-
-------------------------------------------------------------------------
+---
 
 ## 3. Update Product
-
 ✅ Bearer Token
 
+```
 PUT /products/{id}
+```
 
-Catatan: Bisa kirim ulang field image untuk update gambar
+**Request Body**
+```json
+{
+  "name": "Nasi Goreng Spesial",
+  "price": 18000,
+  "stock": 80
+}
+```
 
-------------------------------------------------------------------------
+---
 
 ## 4. Delete Product
-
 ✅ Bearer Token
 
+```
 DELETE /products/{id}
+```
 
-------------------------------------------------------------------------
+---
 
 # 🛒 CART
 
 ## 1. Get Cart
-
 ✅ Bearer Token
 
+```
 GET /cart
+```
 
-Response: \[ { "id": 1, "product_id": 1, "quantity": 2, "product": {
-"name": "Nasi Goreng", "price": 15000, "image_url":
-"http://localhost:8000/storage/products/xxx.jpg" } }\]
+**Response**
+```json
+[
+  {
+    "id": 1,
+    "product_id": 1,
+    "quantity": 2,
+    "product": {
+      "name": "Nasi Goreng",
+      "price": 15000
+    }
+  }
+]
+```
 
-------------------------------------------------------------------------
+---
 
 ## 2. Add to Cart
-
 ✅ Bearer Token
 
+```
 POST /cart
+```
 
-Request Body: { "product_id": 1, "quantity": 2 }
+**Request Body**
+```json
+{
+  "product_id": 1,
+  "quantity": 2
+}
+```
 
-------------------------------------------------------------------------
+---
 
 ## 3. Update Quantity
-
 ✅ Bearer Token
 
+```
 PUT /cart/{id}
+```
 
-Request Body: { "quantity": 3 }
+**Request Body**
+```json
+{
+  "quantity": 3
+}
+```
 
-------------------------------------------------------------------------
+---
 
 ## 4. Delete Cart Item
-
 ✅ Bearer Token
 
+```
 DELETE /cart/{id}
+```
 
-------------------------------------------------------------------------
+---
 
 # 💰 ORDER
 
 ## 1. Checkout
-
 ✅ Bearer Token
 
+```
 POST /orders
+```
 
-Request Body: { "store_id": 1, "order_type": "pickup", "notes": "Tanpa
-pedas" }
+**Request Body**
+```json
+{
+  "store_id": 1,
+  "order_type": "pickup",
+  "notes": "Tanpa pedas"
+}
+```
 
-Response: { "message": "Order created", "order_id": 1, "status":
-"pending" }
+**Response**
+```json
+{
+  "message": "Order created",
+  "order_id": 1,
+  "status": "pending"
+}
+```
 
-------------------------------------------------------------------------
+---
 
 ## 2. Get Orders
+✅ Bearer Token
 
+```
 GET /orders
+```
 
-------------------------------------------------------------------------
+---
 
 ## 3. Get Order Detail
+✅ Bearer Token
 
+```
 GET /orders/{id}
+```
 
-Response: { "id": 1, "status": "pending", "items": \[ { "product_name":
-"Nasi Goreng", "quantity": 2, "price": 15000, "subtotal": 30000 } \],
-"total_price": 30000 }
-
-------------------------------------------------------------------------
+---
 
 ## 4. Accept Order
+✅ Bearer Token (Seller)
 
+```
 POST /orders/{id}/accept
+```
 
-------------------------------------------------------------------------
+---
 
 ## 5. Complete Order
+✅ Bearer Token (Seller)
 
+```
 POST /orders/{id}/complete
+```
 
-------------------------------------------------------------------------
+---
 
 ## 6. Cancel Order
+✅ Bearer Token
 
+```
 POST /orders/{id}/cancel
+```
 
-------------------------------------------------------------------------
+---
 
 # 🔄 ORDER STATUS
 
-pending accepted completed cancelled
+```
+pending
+accepted
+completed
+cancelled
+```
 
-------------------------------------------------------------------------
+---
 
 # ⚠️ ERROR FORMAT
 
-General: { "message": "Error message" }
+```json
+{
+  "message": "Error message"
+}
+```
 
-Validation: { "message": "Validation failed", "errors": { "email":
-\["Email already taken"\] } }
-
-------------------------------------------------------------------------
-
-# 📊 STATUS CODE
-
-200 OK 201 Created 401 Unauthorized 403 Forbidden 404 Not Found 422
-Validation Error
-
-------------------------------------------------------------------------
+---
 
 # 🚀 NOTES
 
--   Gunakan Bearer Token untuk endpoint yang bertanda ✅
--   Product menggunakan upload file (multipart/form-data)
--   Gunakan image_url untuk menampilkan gambar di frontend
--   Jangan kirim price dari frontend saat checkout
--   Handle error 401 di frontend
+- Gunakan Bearer Token untuk endpoint yang bertanda ✅
+- Jangan kirim price dari frontend saat checkout
+- Pastikan handle error 401 di frontend
+- Gunakan endpoint ini sebagai contract antara frontend & backend
