@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Store;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use OpenApi\Annotations as OA;
 
@@ -134,7 +135,8 @@ class ProductController extends Controller
             'store_id' => 'required|exists:stores,id',
             'name' => 'required',
             'price' => 'required|integer',
-            'stock' => 'required|integer'
+            'stock' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
         if ($validator->fails()) {
@@ -144,13 +146,20 @@ class ProductController extends Controller
             ], 422);
         }
 
+        $imagePath = null;
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('products', 'public');
+        }
+
         $product = Product::create([
             'store_id' => $request->store_id,
             'name' => $request->name,
             'price' => $request->price,
             'stock' => $request->stock,
             'description' => $request->description,
-            'image' => $request->image
+            'image' => $imagePath,
+            'is_available' => true
         ]);
 
         return response()->json([
@@ -210,12 +219,22 @@ class ProductController extends Controller
             ], 404);
         }
 
+        if ($request->hasFile('image')) {
+
+            // hapus gambar lama
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+            $imagePath = $request->file('image')->store('products', 'public');
+            $product->image = $imagePath;
+        }
+
         $product->update([
             'name' => $request->name ?? $product->name,
             'price' => $request->price ?? $product->price,
             'stock' => $request->stock ?? $product->stock,
             'description' => $request->description ?? $product->description,
-            'image' => $request->image ?? $product->image,
             'is_available' => $request->is_available ?? $product->is_available
         ]);
 
