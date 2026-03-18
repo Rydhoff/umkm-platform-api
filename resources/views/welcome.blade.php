@@ -177,7 +177,7 @@
 
             <div class="buttons">
                 <a href="https://github.com/Rydhoff/umkm-platform-api" target="_blank" class="btn btn-outline">
-                    View on GitHub
+                    API Documentation on GitHub
                 </a>
             </div>
 
