@@ -169,6 +169,22 @@ class ProductController extends Controller
         ]);
     }
 
+    // search
+    public function search(Request $request)
+    {
+        $keyword = $request->query('q');
+
+        $products = Product::with('store')
+            ->where('is_available', true)
+            ->where('name', 'LIKE', '%' . $keyword . '%')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $products
+        ]);
+    }
+
     /**
      * @OA\Put(
      *     path="/products/{id}",

@@ -145,7 +145,8 @@ class OrderController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Checkout failed'
+                'error' => $e->getMessage(),
+                'line' => $e->getLine()
             ], 500);
         }
     }
@@ -246,13 +247,21 @@ class OrderController extends Controller
     // SELLER ACCEPT ORDER
     public function accept($id)
     {
-        $order = Order::find($id);
+        $order = Order::with('store')->find($id);
 
         if (!$order) {
             return response()->json([
                 'success' => false,
                 'message' => 'Order not found'
             ], 404);
+        }
+
+        // 🔥 VALIDASI: hanya seller pemilik store
+        if ($order->store->user_id !== auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden'
+            ], 403);
         }
 
         $order->status = 'accepted';

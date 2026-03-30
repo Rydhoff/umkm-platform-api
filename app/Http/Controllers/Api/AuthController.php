@@ -7,6 +7,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * @OA\Info(
@@ -196,6 +200,109 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Logout success'
+        ]);
+    }
+
+    // update profile
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user->update($request->only(['name', 'email', 'phone']));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated',
+            'data' => $user
+        ]);
+    }
+
+    // forgot password
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email not found'
+            ], 404);
+        }
+
+        $token = Str::random(60);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            [
+                'token' => bcrypt($token),
+                'created_at' => now()
+            ]
+        );
+
+        // 👉 arahkan ke frontend React
+        $resetLink = "http://localhost:3000/reset-password?token=$token&email=$user->email";
+
+        Mail::raw("Klik link untuk reset password: $resetLink", function ($message) use ($user) {
+            $message->to($user->email)
+                ->subject('Reset Password');
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reset link sent to email'
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'token' => 'required',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$record || !Hash::check($request->token, $record->token)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired token'
+            ], 400);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        // hapus token
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset success'
         ]);
     }
 }

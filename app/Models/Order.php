@@ -9,9 +9,12 @@ class Order extends Model
     protected $fillable = [
         'buyer_id',
         'store_id',
+        'product_total',
+        'delivery_fee',
+        'platform_fee',
         'total_price',
-        'order_type',   // pickup / delivery
-        'status',       // pending, accepted, completed
+        'order_type',
+        'status'
     ];
 
     // RELATION

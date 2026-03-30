@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\StoreController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\ChatController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -20,6 +21,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
+// PASSWORD
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+// UPDATE PROFILE
+Route::middleware('auth:sanctum')->group(function () {
+    Route::put('/update-profile', [AuthController::class, 'updateProfile']);
+});
+
 // STORES
 Route::get('/stores/nearby', [StoreController::class, 'nearby']);
 Route::get('/stores/{id}', [StoreController::class, 'show']);
@@ -29,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // PRODUCTS
 Route::get('/stores/{id}/products', [ProductController::class, 'index']);
+Route::get('/products/search', [ProductController::class, 'search']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
@@ -53,4 +64,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
 });
 
-
+// CHAT
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/conversations', [ChatController::class, 'createConversation']);
+    Route::get('/conversations', [ChatController::class, 'index']);
+    Route::get('/conversations/{id}/messages', [ChatController::class, 'getMessages']);
+    Route::post('/messages', [ChatController::class, 'sendMessage']);
+});

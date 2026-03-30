@@ -219,7 +219,7 @@ Ridho Darmawan
 
 Mahasiswa Teknologi Informasi.
 
-# 📘 UMKM Platform API Documentation
+# 📘 UMKM Platform API Documentation (Updated)
 
 Base URL:
 ```
@@ -244,7 +244,7 @@ POST /register
   "name": "Ridho Darmawan",
   "email": "ridho@mail.com",
   "password": "password123",
-  "password_confirmation": "password123",
+  "phone": "08123456789",
   "role": "buyer"
 }
 ```
@@ -252,12 +252,17 @@ POST /register
 **Response**
 ```json
 {
-  "message": "Register success",
-  "user": {
-    "id": 1,
-    "name": "Ridho Darmawan",
-    "email": "ridho@mail.com",
-    "role": "buyer"
+  "success": true,
+  "message": "User registered",
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "Ridho Darmawan",
+      "email": "ridho@mail.com",
+      "phone": "08123456789",
+      "role": "buyer"
+    },
+    "token": "1|xxxxx"
   }
 }
 ```
@@ -283,11 +288,16 @@ POST /login
 **Response**
 ```json
 {
-  "token": "1|xxxxx",
-  "user": {
-    "id": 1,
-    "name": "Ridho Darmawan",
-    "role": "buyer"
+  "success": true,
+  "message": "Login success",
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "Ridho Darmawan",
+      "email": "ridho@mail.com",
+      "role": "buyer"
+    },
+    "token": "1|xxxxx"
   }
 }
 ```
@@ -297,6 +307,7 @@ POST /login
 ## 3. Profile
 ✅ Bearer Token
 
+**Endpoint**
 ```
 GET /profile
 ```
@@ -304,10 +315,14 @@ GET /profile
 **Response**
 ```json
 {
-  "id": 1,
-  "name": "Ridho Darmawan",
-  "email": "ridho@mail.com",
-  "role": "buyer"
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "Ridho Darmawan",
+    "email": "ridho@mail.com",
+    "phone": "08123456789",
+    "role": "buyer"
+  }
 }
 ```
 
@@ -316,8 +331,108 @@ GET /profile
 ## 4. Logout
 ✅ Bearer Token
 
+**Endpoint**
 ```
 POST /logout
+```
+
+**Response**
+```json
+{
+  "success": true,
+  "message": "Logout success"
+}
+```
+
+---
+
+## 5. Update Profile
+✅ Bearer Token
+
+**Endpoint**
+```
+PUT /update-profile
+```
+
+**Request Body**
+```json
+{
+  "name": "Ridho D.",
+  "email": "ridho.new@mail.com",
+  "phone": "08123456790"
+}
+```
+
+**Response**
+```json
+{
+  "success": true,
+  "message": "Profile updated",
+  "data": {
+    "id": 1,
+    "name": "Ridho D.",
+    "email": "ridho.new@mail.com",
+    "phone": "08123456790",
+    "role": "buyer"
+  }
+}
+```
+
+---
+
+# 🔑 PASSWORD
+
+## 1. Forgot Password
+❌ No Bearer Token
+
+**Endpoint**
+```
+POST /forgot-password
+```
+
+**Request Body**
+```json
+{
+  "email": "ridho@mail.com"
+}
+```
+
+**Response**
+```json
+{
+  "success": true,
+  "message": "Reset link sent to email"
+}
+```
+
+> 🔹 Catatan: Email akan berisi link reset password yang mengarah ke frontend React.
+
+---
+
+## 2. Reset Password
+❌ No Bearer Token
+
+**Endpoint**
+```
+POST /reset-password
+```
+
+**Request Body**
+```json
+{
+  "email": "ridho@mail.com",
+  "token": "xxxxxx",
+  "password": "newpassword123",
+  "password_confirmation": "newpassword123"
+}
+```
+
+**Response**
+```json
+{
+  "success": true,
+  "message": "Password reset success"
+}
 ```
 
 ---
@@ -392,52 +507,148 @@ GET /stores/nearby?lat=-6.2&lng=106.9
 GET /stores/{id}/products
 ```
 
+**Response**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Nasi Goreng",
+      "price": 15000,
+      "stock": 100,
+      "description": "Nasi goreng spesial",
+      "image": "products/image.jpg",
+      "is_available": true
+    }
+  ]
+}
+```
+
 ---
 
-## 2. Create Product
+## 2. Search Products
+❌ No Bearer Token
+
+```
+GET /products/search?q={keyword}
+```
+
+**Query Parameter**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| q | string | Keyword pencarian nama produk |
+
+**Response**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Nasi Goreng",
+      "price": 15000,
+      "stock": 100,
+      "is_available": true,
+      "store": {
+        "id": 1,
+        "name": "Warung Bu Siti"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 3. Create Product
 ✅ Bearer Token
 
 ```
 POST /products
 ```
 
+> 📎 Gunakan `multipart/form-data` jika upload gambar
+
 **Request Body**
+| Field | Type | Required | Keterangan |
+|-------|------|----------|------------|
+| store_id | integer | ✅ | ID toko milik seller |
+| name | string | ✅ | Nama produk |
+| price | integer | ✅ | Harga produk |
+| stock | integer | ✅ | Stok produk |
+| description | string | ❌ | Deskripsi produk |
+| image | file | ❌ | Gambar produk (jpg/jpeg/png, max 2MB) |
+
+**Response**
 ```json
 {
-  "store_id": 1,
-  "name": "Nasi Goreng",
-  "description": "Nasi goreng spesial",
-  "image": "Choose file (Multipart Form Data)",
-  "price": 15000,
-  "stock": 100
+  "success": true,
+  "message": "Product created",
+  "data": {
+    "id": 1,
+    "store_id": 1,
+    "name": "Nasi Goreng",
+    "price": 15000,
+    "stock": 100,
+    "description": "Nasi goreng spesial",
+    "image": "products/image.jpg",
+    "is_available": true
+  }
 }
 ```
 
 ---
 
-## 3. Update Product
+## 4. Update Product
 ✅ Bearer Token
 
 ```
 PUT /products/{id}
 ```
 
+> 📎 Gunakan `multipart/form-data` jika update gambar
+
 **Request Body**
+| Field | Type | Required | Keterangan |
+|-------|------|----------|------------|
+| name | string | ❌ | Nama produk |
+| price | integer | ❌ | Harga produk |
+| stock | integer | ❌ | Stok produk |
+| description | string | ❌ | Deskripsi produk |
+| image | file | ❌ | Gambar baru (otomatis hapus gambar lama) |
+| is_available | boolean | ❌ | Status ketersediaan produk |
+
+**Response**
 ```json
 {
-  "name": "Nasi Goreng Spesial",
-  "price": 18000,
-  "stock": 80
+  "success": true,
+  "message": "Product updated",
+  "data": {
+    "id": 1,
+    "name": "Nasi Goreng Spesial",
+    "price": 18000,
+    "stock": 80,
+    "is_available": true
+  }
 }
 ```
 
 ---
 
-## 4. Delete Product
+## 5. Delete Product
 ✅ Bearer Token
 
 ```
 DELETE /products/{id}
+```
+
+**Response**
+```json
+{
+  "success": true,
+  "message": "Product deleted"
+}
 ```
 
 ---
@@ -520,20 +731,50 @@ POST /orders
 ```
 
 **Request Body**
+| Field | Type | Required | Keterangan |
+|-------|------|----------|------------|
+| store_id | integer | ✅ | ID toko yang dipesan |
+| order_type | string | ✅ | `pickup` atau `delivery` |
+| buyer_lat | float | ❌ | Latitude pembeli (wajib jika `delivery`) |
+| buyer_lng | float | ❌ | Longitude pembeli (wajib jika `delivery`) |
+
+> 🔹 `buyer_lat` dan `buyer_lng` diperlukan jika `order_type = delivery` untuk menghitung ongkir otomatis (Rp 2.000/km).
+> Platform fee sebesar **Rp 2.000** dikenakan di setiap order.
+
+**Request Body (Pickup)**
 ```json
 {
   "store_id": 1,
-  "order_type": "pickup",
-  "notes": "Tanpa pedas"
+  "order_type": "pickup"
+}
+```
+
+**Request Body (Delivery)**
+```json
+{
+  "store_id": 1,
+  "order_type": "delivery",
+  "buyer_lat": -6.2,
+  "buyer_lng": 106.9
 }
 ```
 
 **Response**
 ```json
 {
+  "success": true,
   "message": "Order created",
-  "order_id": 1,
-  "status": "pending"
+  "data": {
+    "id": 1,
+    "buyer_id": 1,
+    "store_id": 1,
+    "order_type": "pickup",
+    "status": "pending",
+    "product_total": 30000,
+    "delivery_fee": 0,
+    "platform_fee": 2000,
+    "total_price": 32000
+  }
 }
 ```
 
@@ -546,6 +787,26 @@ POST /orders
 GET /orders
 ```
 
+**Response**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "store_id": 1,
+      "order_type": "pickup",
+      "status": "pending",
+      "product_total": 30000,
+      "delivery_fee": 0,
+      "platform_fee": 2000,
+      "total_price": 32000,
+      "items": []
+    }
+  ]
+}
+```
+
 ---
 
 ## 3. Get Order Detail
@@ -555,42 +816,225 @@ GET /orders
 GET /orders/{id}
 ```
 
+**Response**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "store_id": 1,
+    "order_type": "delivery",
+    "status": "pending",
+    "product_total": 30000,
+    "delivery_fee": 6000,
+    "platform_fee": 2000,
+    "total_price": 38000,
+    "items": [
+      {
+        "id": 1,
+        "product_id": 1,
+        "quantity": 2,
+        "price": 15000,
+        "product": {
+          "name": "Nasi Goreng",
+          "image": "products/image.jpg"
+        }
+      }
+    ]
+  }
+}
+```
+
 ---
 
 ## 4. Accept Order
-✅ Bearer Token (Seller)
+✅ Bearer Token (Seller only)
 
 ```
 POST /orders/{id}/accept
 ```
 
+> 🔒 Hanya seller pemilik toko yang bisa menerima order.
+
+**Response**
+```json
+{
+  "success": true,
+  "message": "Order accepted"
+}
+```
+
 ---
 
 ## 5. Complete Order
-✅ Bearer Token (Seller)
+✅ Bearer Token (Seller only)
 
 ```
 POST /orders/{id}/complete
 ```
 
+**Response**
+```json
+{
+  "success": true,
+  "message": "Order completed"
+}
+```
+
 ---
 
 ## 6. Cancel Order
-✅ Bearer Token
+✅ Bearer Token (Buyer atau Seller)
 
 ```
 POST /orders/{id}/cancel
+```
+
+> 🔹 Cancel hanya bisa dilakukan ketika status masih `pending` atau `accepted`.
+> 🔒 Hanya buyer pemilik order atau seller pemilik toko yang dapat cancel.
+
+**Response**
+```json
+{
+  "message": "Order cancelled"
+}
 ```
 
 ---
 
 # 🔄 ORDER STATUS
 
+| Status | Deskripsi |
+|--------|----------|
+| `pending` | Order baru dibuat, menunggu konfirmasi seller |
+| `accepted` | Seller sudah menerima order |
+| `completed` | Order selesai |
+| `cancelled` | Order dibatalkan |
+
+---
+
+# 💬 CHAT
+
+## 1. Create or Get Conversation
+✅ Bearer Token
+
 ```
-pending
-accepted
-completed
-cancelled
+POST /conversations
+```
+
+> 🔹 Jika conversation antara buyer dan seller untuk toko tersebut sudah ada, endpoint ini mengembalikan conversation yang sudah ada (tidak membuat duplikat).
+
+**Request Body**
+```json
+{
+  "store_id": 1
+}
+```
+
+**Response**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "buyer_id": 2,
+    "seller_id": 1,
+    "store_id": 1,
+    "created_at": "2026-03-30T08:00:00.000000Z"
+  }
+}
+```
+
+---
+
+## 2. Get Conversations (Inbox)
+✅ Bearer Token
+
+```
+GET /conversations
+```
+
+> 🔹 Menampilkan semua conversation milik user (baik sebagai buyer maupun seller).
+
+**Response**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "buyer_id": 2,
+      "seller_id": 1,
+      "store_id": 1,
+      "created_at": "2026-03-30T08:00:00.000000Z"
+    }
+  ]
+}
+```
+
+---
+
+## 3. Get Messages
+✅ Bearer Token
+
+```
+GET /conversations/{id}/messages
+```
+
+> 🔒 Hanya buyer atau seller dalam conversation yang dapat mengakses pesan.
+
+**Response**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "conversation_id": 1,
+      "sender_id": 2,
+      "message": "Halo, masih ada stok?",
+      "created_at": "2026-03-30T08:01:00.000000Z"
+    },
+    {
+      "id": 2,
+      "conversation_id": 1,
+      "sender_id": 1,
+      "message": "Masih ada, silakan order!",
+      "created_at": "2026-03-30T08:02:00.000000Z"
+    }
+  ]
+}
+```
+
+---
+
+## 4. Send Message
+✅ Bearer Token
+
+```
+POST /messages
+```
+
+**Request Body**
+```json
+{
+  "conversation_id": 1,
+  "message": "Halo, masih ada stok?"
+}
+```
+
+**Response**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "conversation_id": 1,
+    "sender_id": 2,
+    "message": "Halo, masih ada stok?",
+    "created_at": "2026-03-30T08:01:00.000000Z"
+  }
+}
 ```
 
 ---
@@ -611,3 +1055,5 @@ cancelled
 - Jangan kirim price dari frontend saat checkout
 - Pastikan handle error 401 di frontend
 - Gunakan endpoint ini sebagai contract antara frontend & backend
+- Untuk order `delivery`, kirim `buyer_lat` dan `buyer_lng` agar ongkir dihitung otomatis
+- Platform fee **Rp 2.000** selalu dikenakan di setiap order
